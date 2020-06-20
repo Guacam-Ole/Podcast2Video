@@ -1,5 +1,9 @@
-﻿using System;
+﻿using P2VEntities.Config;
+
+using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -25,6 +29,16 @@ namespace P2VBL
 
             if (!parseSuccess) throw new Exception($"Cannot parse '{offset}'");
             return new TimeSpan(0, hour, minute, second, ms);
+        }
+
+        public static string ToFilename(this string potentialFilename)
+        {
+            return string.Join("_", potentialFilename.Split(Path.GetInvalidFileNameChars()));
+        }
+
+        public static Rectangle ToRectangle(this BlockElement blockelement)
+        {
+            return new Rectangle(blockelement.X, blockelement.Y, blockelement.Width, blockelement.Height);
         }
     }
 }

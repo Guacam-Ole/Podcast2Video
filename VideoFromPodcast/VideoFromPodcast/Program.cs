@@ -1,26 +1,74 @@
-﻿using P2VBL;
+﻿using Microsoft.Extensions.Hosting;
+
+using P2VBL;
 
 using System;
 using System.Drawing.Imaging;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Runtime.Serialization;
+using System.Threading;
 
 namespace VideoFromPodcast
 {
     class Program
     {
+        private static void GetStartupParamters(string[] args, out string episode, out TimeSpan? chapter, out TimeSpan? start, out TimeSpan? finish)
+        {
+            episode = null;
+            chapter = null;
+            start = null;
+            finish = null;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                try
+                {
+                    if (args[i] == "-episode") episode = args[i + 1];
+                    if (args[i] == "-chapter") chapter = args[i + 1].ToTimeSpan();
+                    if (args[i] == "-start") start = args[i + 1].ToTimeSpan();
+                    if (args[i] == "-finish") start = args[i + 1].ToTimeSpan();
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Error on parameter '{args[i]}'", ex);
+                }
+            }
+        }
+
         static void Main(string[] args)
         {
-            var rss=new Rss("https://www.blathering.de/feed/mp3/");
-            var output=new Image(rss.Podcast);
-            //output.CreateBackgroundImage();
-            //var position = new TimeSpan();
+            if (args.Length == 0)
+            {
+                Console.WriteLine("usage:");
+                Console.WriteLine("p2v <url> <options>");
+                Console.WriteLine("Example:");
+                Console.WriteLine("p2v https://www.blathering.de/feed/mp3");
+                Console.WriteLine("Go to https://github.com/OleAlbers/Podcast2Video/wiki for a complete list of options");
+                return;
+            }
 
-            //while (position<output.CurrentEpisode.Duration) 
-            //{
-            //    var img = output.CreateImageForTime(position);
-            //    img.Save($"D:\\tmpimg\\{position.TotalSeconds}.jpg", ImageFormat.Jpeg);
-            //    position=position.Add(TimeSpan.FromSeconds(10));
-            //}
-            var video=new Video(output);
+            GetStartupParamters(args, out string episode, out TimeSpan? chapter, out TimeSpan? start, out TimeSpan? finish);
+            var config = new Config();
+            config.OverrideConfig(args);
+
+            var rss = new Rss(args[0]);
+            var output = new Image(rss.Podcast, episode);
+            Video video;
+            if (chapter!=null)
+            {
+                var matchingChapter = output.CurrentEpisode.Chapters.OrderByDescending(q=>q.Offset).FirstOrDefault(q => q.Offset <= chapter.Value);
+                if (matchingChapter == null) throw new Exception($"No chapter at {chapter}");
+                video = new Video(output, output.CurrentEpisode.Chapters.IndexOf(matchingChapter));
+            } else if (start==null && finish==null)
+            {
+                video = new Video(output);
+            } else
+            {
+                if (start == null) start = new TimeSpan();
+                if (finish == null) finish = output.CurrentEpisode.Duration;
+                video = new Video(output, start.Value, finish.Value);
+            }
             video.CreateVideo();
 
         }

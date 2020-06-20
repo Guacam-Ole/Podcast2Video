@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoFromPodcast", "VideoFromPodcast\VideoFromPodcast.csproj", "{42C5A83E-DACF-4F4C-ADD3-000A0746033B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Podcast2Video", "VideoFromPodcast\Podcast2Video.csproj", "{42C5A83E-DACF-4F4C-ADD3-000A0746033B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2VBL", "P2VBL\P2VBL.csproj", "{BABA9CE1-012E-48F3-9927-B3743F498AFF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "P2VBL", "P2VBL\P2VBL.csproj", "{BABA9CE1-012E-48F3-9927-B3743F498AFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2VEntities", "P2VEntities\P2VEntities.csproj", "{4F1113FF-340D-4123-BD3A-DA8FAEAE9ED4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "P2VEntities", "P2VEntities\P2VEntities.csproj", "{4F1113FF-340D-4123-BD3A-DA8FAEAE9ED4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

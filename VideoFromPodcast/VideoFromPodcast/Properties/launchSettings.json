@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Podcast2Video": {
+      "commandName": "Project",
+      "commandLineArgs": "https://www.blathering.de/feed/mp3 -chapter 2:26:00"
+    }
+  }
+}
