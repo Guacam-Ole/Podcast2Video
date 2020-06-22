@@ -13,6 +13,9 @@ namespace VideoFromPodcast
 {
     class Program
     {
+        private static bool _paintImages = false;
+        private static string _outputFilename=null;
+
         private static void GetStartupParamters(string[] args, out string episode, out TimeSpan? chapter, out TimeSpan? start, out TimeSpan? finish)
         {
             episode = null;
@@ -28,6 +31,8 @@ namespace VideoFromPodcast
                     if (args[i] == "-chapter") chapter = args[i + 1].ToTimeSpan();
                     if (args[i] == "-start") start = args[i + 1].ToTimeSpan();
                     if (args[i] == "-finish") start = args[i + 1].ToTimeSpan();
+                    if (args[i] == "-images") _paintImages = true;
+                    if (args[i] == "-output") _outputFilename = args[i + 1];
                 }
                 catch (Exception ex)
                 {
@@ -54,10 +59,11 @@ namespace VideoFromPodcast
 
             var rss = new Rss(args[0]);
             var output = new Image(rss.Podcast, episode);
+            
             Video video;
             if (chapter!=null)
             {
-                var matchingChapter = output.CurrentEpisode.Chapters.OrderByDescending(q=>q.Offset).FirstOrDefault(q => q.Offset <= chapter.Value);
+                var matchingChapter = output.CurrentEpisode.GetChapterAt(chapter.Value);
                 if (matchingChapter == null) throw new Exception($"No chapter at {chapter}");
                 video = new Video(output, output.CurrentEpisode.Chapters.IndexOf(matchingChapter));
             } else if (start==null && finish==null)
@@ -69,7 +75,7 @@ namespace VideoFromPodcast
                 if (finish == null) finish = output.CurrentEpisode.Duration;
                 video = new Video(output, start.Value, finish.Value);
             }
-            video.CreateVideo();
+            video.CreateVideo(_paintImages, _outputFilename);
 
         }
     }

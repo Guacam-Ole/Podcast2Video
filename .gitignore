@@ -348,3 +348,9 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+*.tar
+VideoFromPodcast/linux64/
+VideoFromPodcast/linuxarm/
+VideoFromPodcast/linuxarm64/
+VideoFromPodcast/VideoFromPodcast/win.zip
+VideoFromPodcast/VideoFromPodcast/win/
