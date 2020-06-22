@@ -19,7 +19,6 @@ namespace P2VBL
 
         private P2VEntities.Config.FFMpeg _ffmpegConfig = Config.Configuration.FFMpeg;
 
-
         private Video(Image image, int? chapterId, TimeSpan? start, TimeSpan? finish)
         {
             _image = image;
@@ -68,7 +67,6 @@ namespace P2VBL
 
             return new MemoryStream(mp3);
         }
-
      
         private string Dos(string filename)
         {
@@ -95,7 +93,7 @@ namespace P2VBL
             CleanupFiles(audioFilenameCrop, slideshowFilename, audioFilename);
         }
 
-        private void AddImagesToFile(Process ffmpeg)
+        private void AddImagesToFile(Process ffmpeg, bool storeImages=false)
         {
             var position = _start;
             int imageCount = 0;
@@ -106,8 +104,9 @@ namespace P2VBL
                 var imageFile = _image.CreateImageForTime(position);
                 using (var imageStream = new MemoryStream())
                 {
-                    imageFile.Save(imageStream, ImageFormat.Jpeg);
+                    imageFile.Save(imageStream, ImageFormat.Png);
                     imageStream.WriteTo(ffmpeg.StandardInput.BaseStream);
+                    if (storeImages) imageFile.Save(position.TotalSeconds + ".png");
                 }
                 position = position.Add(TimeSpan.FromSeconds(1));
                 imageCount++;
@@ -144,13 +143,13 @@ namespace P2VBL
             return Path.Combine(_ffmpegConfig.TmpDirectory, filename.ToFilename());
         }
 
-        public void CreateVideo()
+        public void CreateVideo(bool storeImages=false, string filename=null)
         {
-            string outputfilename = GetFilenameFromEpisode();
+            string outputfilename =filename?? GetFilenameFromEpisode();
             string noAudioFilename = outputfilename + ".noaudio.mp4";
 
             var ffmpeg = CreateProcess(noAudioFilename, _ffmpegConfig.Slideshow);
-            AddImagesToFile(ffmpeg);
+            AddImagesToFile(ffmpeg, storeImages);
             FinishProcess(ffmpeg);
             AddAudio(outputfilename);
 

@@ -49,15 +49,40 @@ namespace P2VBL
             graphics.DrawImage(_podcastImage, targetRegion, sourceRegion, GraphicsUnit.Pixel);
         }
 
-        private void DrawBar(ref Graphics graphics)
+        private void DrawTimeline(ref Graphics graphics, P2VEntities.Config.BlockElement block)
         {
-            graphics.FillRectangle(_config.Episode.Timeline.BrushValue, _config.Episode.Timeline.ToRectangle());
+            graphics.FillRectangle(block.BrushValue, block.ToRectangle());
+        }
+        private void DrawTimelinePosition(ref Graphics graphics, TimeSpan position, P2VEntities.Config.BlockElement block, Brush brush, bool forChapter)
+        {
+            graphics.FillRectangle(brush, new Rectangle(block.X, block.Y, (int)(block.Width * GetRelativePosition(position, forChapter)), block.Height));
+        }
+
+        private void DrawEpisodeTimeline(ref Graphics graphics)
+        {
+            DrawTimeline(ref graphics, _config.Episode.Timeline);
+        }
+        private void DrawEpisodeTimelinePosition(ref Graphics graphics, TimeSpan position)
+        {
+            DrawTimelinePosition(ref graphics, position, _config.Episode.Timeline, _config.Episode.TimelineActive.BrushValue, false);
+        }
+
+        private void DrawChapterTimeline(ref Graphics graphics)
+        {
+            DrawTimeline(ref graphics, _config.Episode.TimelineChapter);
+        }
+        private void DrawChapterTimelinePosition(ref Graphics graphics, TimeSpan position)
+        {
+            DrawTimelinePosition(ref graphics, position, _config.Episode.TimelineChapter, _config.Episode.TimelineChapterActive.BrushValue, true);
         }
 
         private void DrawTitle(ref Graphics graphics)
         {
             DrawCenteredText(ref graphics, _config.Title,Podcast.Title );
+            DrawCenteredText(ref graphics, _config.Description, Podcast.Description);
             DrawCenteredText(ref graphics, _config.Episode.Title, CurrentEpisode.Title);
+            DrawCenteredText(ref graphics, _config.Episode.Description, CurrentEpisode.Description);
+
         }
 
         private void DrawCenteredText(ref Graphics graphics, P2VEntities.Config.TextElement textelement, string text)
@@ -74,22 +99,36 @@ namespace P2VBL
             var emptyBackground = new Bitmap(_config.Background.Width, _config.Background.Height, PixelFormat.Format24bppRgb);
             var graphics = Graphics.FromImage(emptyBackground);
             DrawBackground(ref graphics);
-            DrawBar(ref graphics);
+            DrawEpisodeTimeline(ref graphics);
+            DrawChapterTimeline(ref graphics);
             DrawTitle(ref graphics);
             DrawImage(ref graphics);
             graphics.Dispose();
             return emptyBackground;
         }
 
-        private double GetRelativePosition(TimeSpan currentPosition)
+        private double GetRelativePosition(TimeSpan currentPosition, bool forChapter)
         {
-            return currentPosition.TotalMilliseconds / CurrentEpisode.Duration.TotalMilliseconds;
+            if (forChapter)
+            {
+                var currentChapter = CurrentEpisode.GetChapterAt(currentPosition);
+                if (currentChapter == null) return 0;
+                var nextChapter = CurrentEpisode.GetNextChapter(currentChapter);
+                var finishTime = CurrentEpisode.Duration;
+                if (nextChapter != null) finishTime = nextChapter.Offset;
+                var startTime = currentChapter.Offset;
+
+                var relativePosition = currentPosition.TotalMilliseconds - startTime.TotalMilliseconds;
+                var relativeMax = finishTime.TotalMilliseconds - startTime.TotalMilliseconds;
+                return relativePosition / relativeMax;
+            }
+            else
+            {
+                return currentPosition.TotalMilliseconds / CurrentEpisode.Duration.TotalMilliseconds;
+            }
         }
 
-        private void DrawBarPosition(ref Graphics graphics, TimeSpan position)
-        {
-            graphics.FillRectangle(_config.Episode.TimelineActive.BrushValue, new Rectangle( _config.Episode.Timeline.X, _config.Episode.Timeline.Y, (int)(_config.Episode.Timeline.Width * GetRelativePosition(position)), _config.Episode.Timeline.Height));
-        }
+  
 
         private Chapter GetNearChapter(Chapter currentChapter, int relativePosition)
         {
@@ -107,6 +146,8 @@ namespace P2VBL
             return CurrentEpisode.Chapters.OrderByDescending(q => q.Offset).FirstOrDefault(q => q.Offset <= position);
         }
 
+        
+
         private void DrawChapterInfo(ref Graphics graphics, TimeSpan position)
         {
             var currentChapter = GetChapterAt(position);
@@ -117,7 +158,7 @@ namespace P2VBL
                 if (i == 0) continue;
                 var chapter = GetNearChapter(currentChapter, i);
                 if (chapter == null) continue;
-                var otherChapter = _config.Episode.OtherChapter;
+                var otherChapter = _config.Episode.OtherChapter.Clone();
                 otherChapter.X = otherChapter.X * i + _config.Episode.CurrentChapter.X;
                 otherChapter.Y = otherChapter.Y * i + _config.Episode.CurrentChapter.Y;
                 DrawCenteredText(ref graphics, otherChapter, chapter.Title);
@@ -129,8 +170,10 @@ namespace P2VBL
             _background = _background ?? CreateBackgroundImage();
             var frame = new Bitmap(_background);
             var graphics = Graphics.FromImage(frame);
-            DrawBarPosition(ref graphics, position);
+            DrawEpisodeTimelinePosition(ref graphics, position);
+            DrawChapterTimelinePosition(ref graphics, position);
             DrawChapterInfo(ref graphics, position);
+            DrawCenteredText(ref graphics, _config.Episode.Time,$"{position.Hours}:{position.Minutes:00}:{position.Seconds:00}");
             return frame;
         }
     }
