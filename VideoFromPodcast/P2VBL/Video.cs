@@ -62,38 +62,46 @@ namespace P2VBL
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Error retrieving mp3",ex);
                 throw;
             }
 
             return new MemoryStream(mp3);
         }
-     
+
         private string Dos(string filename)
         {
             return "\"" + filename + "\"";
         }
 
-        private void AddAudio(string baseFilename)
+        private void AddAudio(string baseFilename, string localMp3Path)
         {
             string audioFilename = baseFilename + ".mp3";
             string audioFilenameCrop = baseFilename + ".crop.mp3";
             string outputfilenameFinal = baseFilename + ".mp4";
             string slideshowFilename = baseFilename + ".noaudio.mp4";
 
-            using (FileStream mp3File = new FileStream(audioFilename, FileMode.Create, FileAccess.Write))
+            if (localMp3Path != null)
             {
-                GetAudioStream().CopyTo(mp3File);
+                File.Copy(localMp3Path, audioFilename);
+            }
+            else
+            {
+                using (FileStream mp3File = new FileStream(audioFilename, FileMode.Create, FileAccess.Write))
+                {
+                    GetAudioStream().CopyTo(mp3File);
+                }
             }
 
-            var ffmpeg = CreateProcess(audioFilenameCrop, _ffmpegConfig.CropAudio.Replace("AUDIOFILE", Dos(audioFilename)).Replace("START",_start.ToString()).Replace("FINISH",_finish.ToString()));
+            var ffmpeg = CreateProcess(audioFilenameCrop, _ffmpegConfig.CropAudio.Replace("AUDIOFILE", Dos(audioFilename)).Replace("START", _start.ToString()).Replace("FINISH", _finish.ToString()));
             FinishProcess(ffmpeg);
 
-            ffmpeg = CreateProcess(outputfilenameFinal, _ffmpegConfig.AddAudio.Replace("IMAGEONLY", Dos( slideshowFilename)).Replace("AUDIOFILE", Dos( audioFilenameCrop)));
+            ffmpeg = CreateProcess(outputfilenameFinal, _ffmpegConfig.AddAudio.Replace("IMAGEONLY", Dos(slideshowFilename)).Replace("AUDIOFILE", Dos(audioFilenameCrop)));
             FinishProcess(ffmpeg);
             CleanupFiles(audioFilenameCrop, slideshowFilename, audioFilename);
         }
 
-        private void AddImagesToFile(Process ffmpeg, bool storeImages=false)
+        private void AddImagesToFile(Process ffmpeg, bool storeImages = false)
         {
             var position = _start;
             int imageCount = 0;
@@ -118,7 +126,7 @@ namespace P2VBL
         {
             Process ffmpeg = new Process
             {
-                StartInfo = new ProcessStartInfo(_ffmpegConfig.Path, parameters + " \"" + outputFileName+"\"")
+                StartInfo = new ProcessStartInfo(_ffmpegConfig.Path, parameters + " \"" + outputFileName + "\"")
                 {
                     UseShellExecute = false,
                     RedirectStandardInput = true,
@@ -143,16 +151,15 @@ namespace P2VBL
             return Path.Combine(_ffmpegConfig.TmpDirectory, filename.ToFilename());
         }
 
-        public void CreateVideo(bool storeImages=false, string filename=null)
+        public void CreateVideo(bool storeImages, string filename, string localMp3Path)
         {
-            string outputfilename =filename?? GetFilenameFromEpisode();
+            string outputfilename = filename ?? GetFilenameFromEpisode();
             string noAudioFilename = outputfilename + ".noaudio.mp4";
 
             var ffmpeg = CreateProcess(noAudioFilename, _ffmpegConfig.Slideshow);
             AddImagesToFile(ffmpeg, storeImages);
             FinishProcess(ffmpeg);
-            AddAudio(outputfilename);
-
+            AddAudio(outputfilename, localMp3Path);
         }
 
         private void CleanupFiles(params string[] filenames)

@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 
-
 namespace P2VBL
 {
     public class Image
@@ -19,17 +18,13 @@ namespace P2VBL
 
         private Bitmap _background = null;
 
-
-
-        public Image(Podcast podcast, string episodeId = null)
+        public Image(Podcast podcast, string episodeId)
         {
             Podcast = podcast;
             CurrentEpisode = Podcast.Episodes.First();
             if (episodeId != null) CurrentEpisode = Podcast.Episodes.First(q => q.Unique == episodeId);
             _podcastImage = DownloadImage();
         }
-
-        
 
         private System.Drawing.Image DownloadImage()
         {
@@ -39,7 +34,7 @@ namespace P2VBL
 
         private void DrawBackground(ref Graphics graphics)
         {
-            graphics.FillRectangle(_config.Background.BrushValue,_config.Background.ToRectangle());  
+            graphics.FillRectangle(_config.Background.BrushValue, _config.Background.ToRectangle());
         }
 
         private void DrawImage(ref Graphics graphics)
@@ -53,6 +48,7 @@ namespace P2VBL
         {
             graphics.FillRectangle(block.BrushValue, block.ToRectangle());
         }
+
         private void DrawTimelinePosition(ref Graphics graphics, TimeSpan position, P2VEntities.Config.BlockElement block, Brush brush, bool forChapter)
         {
             graphics.FillRectangle(brush, new Rectangle(block.X, block.Y, (int)(block.Width * GetRelativePosition(position, forChapter)), block.Height));
@@ -62,6 +58,7 @@ namespace P2VBL
         {
             DrawTimeline(ref graphics, _config.Episode.Timeline);
         }
+
         private void DrawEpisodeTimelinePosition(ref Graphics graphics, TimeSpan position)
         {
             DrawTimelinePosition(ref graphics, position, _config.Episode.Timeline, _config.Episode.TimelineActive.BrushValue, false);
@@ -71,6 +68,7 @@ namespace P2VBL
         {
             DrawTimeline(ref graphics, _config.Episode.TimelineChapter);
         }
+
         private void DrawChapterTimelinePosition(ref Graphics graphics, TimeSpan position)
         {
             DrawTimelinePosition(ref graphics, position, _config.Episode.TimelineChapter, _config.Episode.TimelineChapterActive.BrushValue, true);
@@ -78,11 +76,10 @@ namespace P2VBL
 
         private void DrawTitle(ref Graphics graphics)
         {
-            DrawCenteredText(ref graphics, _config.Title,Podcast.Title );
+            DrawCenteredText(ref graphics, _config.Title, Podcast.Title);
             DrawCenteredText(ref graphics, _config.Description, Podcast.Description);
             DrawCenteredText(ref graphics, _config.Episode.Title, CurrentEpisode.Title);
             DrawCenteredText(ref graphics, _config.Episode.Description, CurrentEpisode.Description);
-
         }
 
         private void DrawCenteredText(ref Graphics graphics, P2VEntities.Config.TextElement textelement, string text)
@@ -91,7 +88,7 @@ namespace P2VBL
             graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
             graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
             StringFormat stringFormat = new StringFormat() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-            graphics.DrawString(text, new Font(textelement.Font.Name, textelement.Font.Size), textelement.BrushValue, new PointF(textelement.X,textelement.Y), stringFormat);
+            graphics.DrawString(text, new Font(textelement.Font.Name, textelement.Font.Size), textelement.BrushValue, new PointF(textelement.X, textelement.Y), stringFormat);
         }
 
         public Bitmap CreateBackgroundImage()
@@ -128,8 +125,6 @@ namespace P2VBL
             }
         }
 
-  
-
         private Chapter GetNearChapter(Chapter currentChapter, int relativePosition)
         {
             if (currentChapter == null) return null;
@@ -145,8 +140,6 @@ namespace P2VBL
             if (CurrentEpisode.Chapters == null) return null;
             return CurrentEpisode.Chapters.OrderByDescending(q => q.Offset).FirstOrDefault(q => q.Offset <= position);
         }
-
-        
 
         private void DrawChapterInfo(ref Graphics graphics, TimeSpan position)
         {
@@ -173,7 +166,7 @@ namespace P2VBL
             DrawEpisodeTimelinePosition(ref graphics, position);
             DrawChapterTimelinePosition(ref graphics, position);
             DrawChapterInfo(ref graphics, position);
-            DrawCenteredText(ref graphics, _config.Episode.Time,$"{position.Hours}:{position.Minutes:00}:{position.Seconds:00}");
+            DrawCenteredText(ref graphics, _config.Episode.Time, $"{position.Hours}:{position.Minutes:00}:{position.Seconds:00}");
             return frame;
         }
     }

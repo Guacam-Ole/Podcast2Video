@@ -1,6 +1,10 @@
 ﻿using Microsoft.Extensions.Hosting;
 
+using Newtonsoft.Json;
+
 using P2VBL;
+
+using P2VEntities;
 
 using System;
 using System.Drawing.Imaging;
@@ -13,37 +17,15 @@ namespace VideoFromPodcast
 {
     class Program
     {
-        private static bool _paintImages = false;
-        private static string _outputFilename=null;
-
-        private static void GetStartupParamters(string[] args, out string episode, out TimeSpan? chapter, out TimeSpan? start, out TimeSpan? finish)
-        {
-            episode = null;
-            chapter = null;
-            start = null;
-            finish = null;
-
-            for (int i = 0; i < args.Length; i++)
-            {
-                try
-                {
-                    if (args[i] == "-episode") episode = args[i + 1];
-                    if (args[i] == "-chapter") chapter = args[i + 1].ToTimeSpan();
-                    if (args[i] == "-start") start = args[i + 1].ToTimeSpan();
-                    if (args[i] == "-finish") start = args[i + 1].ToTimeSpan();
-                    if (args[i] == "-images") _paintImages = true;
-                    if (args[i] == "-output") _outputFilename = args[i + 1];
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception($"Error on parameter '{args[i]}'", ex);
-                }
-            }
-        }
 
         static void Main(string[] args)
         {
-            if (args.Length == 0)
+            StartupParameters startupParameters;
+            try
+            {
+                startupParameters = new StartupParameters(args);
+            }
+            catch 
             {
                 Console.WriteLine("usage:");
                 Console.WriteLine("p2v <url> <options>");
@@ -53,29 +35,41 @@ namespace VideoFromPodcast
                 return;
             }
 
-            GetStartupParamters(args, out string episode, out TimeSpan? chapter, out TimeSpan? start, out TimeSpan? finish);
             var config = new Config();
             config.OverrideConfig(args);
+            if (startupParameters.Verbose) Console.WriteLine($"Config: {JsonConvert.SerializeObject(Config.Configuration)}");
 
-            var rss = new Rss(args[0]);
-            var output = new Image(rss.Podcast, episode);
-            
-            Video video;
-            if (chapter!=null)
+            Rss rss;
+
+            if (startupParameters.Rss != null)
             {
-                var matchingChapter = output.CurrentEpisode.GetChapterAt(chapter.Value);
-                if (matchingChapter == null) throw new Exception($"No chapter at {chapter}");
+                rss = new Rss(new Uri(startupParameters.Rss));
+            }
+            else
+            {
+                rss = new Rss(startupParameters.LocalXml);
+            }
+
+            var output = new Image(rss.Podcast, startupParameters.Episode);
+
+            Video video;
+            if (startupParameters.Chapter != null)
+            {
+                var matchingChapter = output.CurrentEpisode.GetChapterAt(startupParameters.Chapter.Value);
+                if (matchingChapter == null) throw new Exception($"No chapter at {startupParameters.Chapter}");
                 video = new Video(output, output.CurrentEpisode.Chapters.IndexOf(matchingChapter));
-            } else if (start==null && finish==null)
+            }
+            else if (startupParameters.Start == null && startupParameters.Finish == null)
             {
                 video = new Video(output);
-            } else
-            {
-                if (start == null) start = new TimeSpan();
-                if (finish == null) finish = output.CurrentEpisode.Duration;
-                video = new Video(output, start.Value, finish.Value);
             }
-            video.CreateVideo(_paintImages, _outputFilename);
+            else
+            {
+                if (startupParameters.Start == null) startupParameters.Start = new TimeSpan();
+                if (startupParameters.Finish == null) startupParameters.Finish = output.CurrentEpisode.Duration;
+                video = new Video(output, startupParameters.Start.Value, startupParameters.Finish.Value);
+            }
+            video.CreateVideo(startupParameters.StoreImages, startupParameters.OutputFilename, startupParameters.LocalMp3);
 
         }
     }

@@ -54,13 +54,33 @@ namespace P2VBL
         public static Chapter GetNextChapter(this Episode episode, Chapter currentchapter)
         {
             int chapterIndex = episode.Chapters.IndexOf(currentchapter);
-            if (chapterIndex < 0 || chapterIndex > episode.Chapters.Count - 1) return null;
+            if (chapterIndex < 0 || chapterIndex >= episode.Chapters.Count - 1) return null;
             return episode.Chapters.ElementAt(chapterIndex + 1);
         }
 
         public static Rectangle ToRectangle(this P2VEntities.Config.BlockElement blockelement)
         {
             return new Rectangle(blockelement.X, blockelement.Y, blockelement.Width, blockelement.Height);
+        }
+
+        public static string GetNextStringFor(this string[] args, string parametername)
+        {
+            var parameterIndex = args.ToList().IndexOf(parametername);
+            if (parameterIndex < 0) return null;
+            return GetNextParam(args, parameterIndex);
+        }
+
+        public static TimeSpan? GetNextTimespanFor(this string[] args, string parametername)
+        {
+            string value = GetNextStringFor(args, parametername);
+            if (value == null) return null;
+            return value.ToTimeSpan();
+        }
+
+        private static string GetNextParam(string[] args, int index)
+        {
+            if (args.Length < index + 1) return null;
+            return args[index + 1];
         }
     }
 }

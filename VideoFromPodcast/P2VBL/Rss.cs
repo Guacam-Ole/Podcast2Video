@@ -4,9 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks.Dataflow;
 using System.Xml;
 
 namespace P2VBL
@@ -14,17 +11,17 @@ namespace P2VBL
     public class Rss
     {
         public Podcast Podcast { get; set; }
-       
-        public Rss(string rssUrl)
+
+        public Rss(string localRssFile)
         {
-            Podcast=ReadRss(new Uri(rssUrl));
+            var rssContent = File.ReadAllBytes(localRssFile);
+            Podcast = ReadRss(new MemoryStream(rssContent));
         }
 
-        private Podcast ReadRss(Uri url)
+        public Rss(Uri rssFeed)
         {
-         
-            var rssContent=new WebClient().DownloadData(url);
-            return ReadRss(new MemoryStream(rssContent));
+            var rssContent = new WebClient().DownloadData(rssFeed);
+            Podcast = ReadRss(new MemoryStream(rssContent));
         }
 
         private Podcast ReadRss(Stream rssStream)
@@ -36,12 +33,12 @@ namespace P2VBL
             namespacemanager.AddNamespace("psc", "http://podlove.org/simple-chapters");
 
             var channel = doc.SelectSingleNode("/rss/channel");
-            var podcast=new Podcast
+            var podcast = new Podcast
             {
                 Title = channel.SelectSingleNode("title").InnerText,
                 Description = channel.SelectSingleNode("description").InnerText,
-                Image= channel.SelectSingleNode("image").SelectSingleNode("url").InnerText,
-                 Episodes=new List<Episode>()
+                Image = channel.SelectSingleNode("image").SelectSingleNode("url").InnerText,
+                Episodes = new List<Episode>()
             };
 
             var episodes = channel.SelectNodes("item");
@@ -53,9 +50,9 @@ namespace P2VBL
                     Description = xmlEpisode.SelectSingleNode("description").InnerText,
                     Link = xmlEpisode.SelectNodes("link")[0].InnerText,
                     Unique = xmlEpisode.SelectSingleNode("itunes:episode", namespacemanager).InnerText,
-                    Duration=xmlEpisode.SelectSingleNode("itunes:duration", namespacemanager).InnerText.ToTimeSpan(),
-                    Audio=xmlEpisode.SelectSingleNode("enclosure").Attributes["url"].InnerText,
-                    Chapters=new List<Chapter>()
+                    Duration = xmlEpisode.SelectSingleNode("itunes:duration", namespacemanager).InnerText.ToTimeSpan(),
+                    Audio = xmlEpisode.SelectSingleNode("enclosure").Attributes["url"].InnerText,
+                    Chapters = new List<Chapter>()
                 };
 
                 var chapterContainer = xmlEpisode.SelectSingleNode("psc:chapters", namespacemanager);
