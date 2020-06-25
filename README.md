@@ -26,3 +26,5 @@ Example for creating a complete podcast - video with default parameters:
 
 [![Blathering 132](http://img.youtube.com/vi/iKoKrhgiTMI/0.jpg)](https://www.youtube.com/watch?v=iKoKrhgiTMI "Blathering 132")
 
+## More Details
+All optional parameters and information about how to modify the appearance can be found in the Wiki: https://github.com/OleAlbers/Podcast2Video/wiki
