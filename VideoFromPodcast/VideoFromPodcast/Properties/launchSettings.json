@@ -2,7 +2,7 @@
   "profiles": {
     "Podcast2Video": {
       "commandName": "Project",
-      "commandLineArgs": "-chapter 0:15:02 -verbose -xkml D:\\\\tmpimg\\feed.xml -mp3 d:\\\\tmpimg\\\\blath.mp3"
+      "commandLineArgs": "https://www.blathering.de/feed/mp3 -chapter 2:10:00"
     }
   }
 }
