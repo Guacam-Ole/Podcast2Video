@@ -16,11 +16,27 @@ namespace P2VBL
 {
     public static class RssHelpers
     {
+        
+
         public static TimeSpan ToTimeSpan(this string offset)
         {
             int ms = 0;
             var offsetSplit = offset.Split(":");
-            if (offsetSplit.Length < 3) throw new Exception($"Cannot parse '{offset}'");
+            if (offsetSplit.Length < 3)
+            {
+                if (int.TryParse(offset, out int offsetInt))
+                {
+                    int noCommaHour = offsetInt / 60 / 60;
+                    int noCommaMinute = offsetInt / 60 - noCommaHour * 60;
+                    int noCommaSecond = offsetInt % 60;
+                    return new TimeSpan(0, noCommaHour, noCommaMinute, noCommaSecond, ms);
+                }
+                else
+                {
+                    throw new Exception($"Cannot parse '{offset}'");
+                }
+            }
+                
 
             bool parseSuccess=int.TryParse(offsetSplit[0], out int hour);
             parseSuccess &= int.TryParse(offsetSplit[1], out int minute);
