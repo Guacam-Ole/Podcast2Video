@@ -52,7 +52,8 @@ namespace P2VBL
                     Unique = xmlEpisode.SelectSingleNode("itunes:episode", namespacemanager).InnerText,
                     Duration = xmlEpisode.SelectSingleNode("itunes:duration", namespacemanager).InnerText.ToTimeSpan(),
                     Audio = xmlEpisode.SelectSingleNode("enclosure").Attributes["url"].InnerText,
-                    Chapters = new List<Chapter>()
+                    Chapters = new List<Chapter>(),
+                    Published=DateTime.Parse(xmlEpisode.SelectSingleNode("pubDate").InnerText)
                 };
 
                 var chapterContainer = xmlEpisode.SelectSingleNode("psc:chapters", namespacemanager);

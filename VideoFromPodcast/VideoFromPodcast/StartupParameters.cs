@@ -23,6 +23,7 @@ namespace P2VEntities
         public bool StoreImages { get; set; }
         public string OutputFilename { get; set; }
         public bool Verbose { get; set; }
+        public bool JustCount { get; set; }
 
         public StartupParameters(string[] args)
         {
@@ -38,6 +39,7 @@ namespace P2VEntities
             LocalMp3 = args.GetNextStringFor("-mp3");
             StoreImages = args.Contains("-images");
             Verbose = args.Contains("-verbose");
+            JustCount = args.Contains("-count");
 
             if (Verbose) Console.WriteLine($"Startup: {JsonConvert.SerializeObject(this)}");
         }

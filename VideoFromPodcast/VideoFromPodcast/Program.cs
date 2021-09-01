@@ -50,6 +50,34 @@ namespace VideoFromPodcast
                 rss = new Rss(startupParameters.LocalXml);
             }
 
+            if (startupParameters.JustCount)
+            {
+                int episodeCount = 0;
+                Episode oldesEpisode = new Episode { Published = DateTime.MaxValue };
+                Episode newestEpisode = new Episode { Published = DateTime.MinValue };
+                Episode shortestEpisode = new Episode { Duration = TimeSpan.MaxValue };
+                Episode longestEpisode = new Episode();
+                TimeSpan totalDuration = new TimeSpan();
+                foreach (var episode in rss.Podcast.Episodes)
+                {
+                    episodeCount++;
+                    if (episode.Duration < shortestEpisode.Duration && episode.Duration.TotalSeconds>0) shortestEpisode = episode;
+                    if (episode.Duration > longestEpisode.Duration) longestEpisode = episode;
+                    if (episode.Published < oldesEpisode.Published) oldesEpisode = episode;
+                    if (episode.Published > newestEpisode.Published) newestEpisode = episode;
+                    totalDuration += episode.Duration;
+                }
+                Console.WriteLine($"Statistiics for {rss.Podcast.Title} ({startupParameters.Rss}):");
+                Console.WriteLine($"Shortest Episode: \t {shortestEpisode} ({shortestEpisode.Duration})");
+                Console.WriteLine($"Longest Episode:  \t {longestEpisode} ({longestEpisode.Duration})");
+                Console.WriteLine($"First Episode:    \t {oldesEpisode}");
+                Console.WriteLine($"Last Episode:     \t {newestEpisode}");
+                Console.WriteLine($"Total Duration:   \t {totalDuration} (in {episodeCount} episodes)");
+
+                Console.ReadLine();
+                return;
+            }
+
             var output = new Image(rss.Podcast, startupParameters.Episode);
 
             Video video;

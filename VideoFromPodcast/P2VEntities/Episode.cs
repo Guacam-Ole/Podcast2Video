@@ -12,10 +12,11 @@ namespace P2VEntities
         public string Unique { get; set; }
         public TimeSpan Duration { get; set; }
         public List<Chapter> Chapters { get; set; }
+        public DateTime Published { get; set; }
 
         public override string ToString()
         {
-            return Title;
+            return $"[{Published}]\t{Title}\t({Link})";
         }
 
     }
