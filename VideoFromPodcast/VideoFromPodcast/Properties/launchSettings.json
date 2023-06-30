@@ -2,7 +2,7 @@
   "profiles": {
     "Podcast2Video": {
       "commandName": "Project",
-      "commandLineArgs": "https://www.blathering.de/feed/mp3 -count"
+      "commandLineArgs": "https://www.blathering.de/feed/mp3 -count -ignore Nullnummer"
     }
   }
 }

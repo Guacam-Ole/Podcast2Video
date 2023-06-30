@@ -24,6 +24,7 @@ namespace P2VEntities
         public string OutputFilename { get; set; }
         public bool Verbose { get; set; }
         public bool JustCount { get; set; }
+        public string Ignore { get; set; }
 
         public StartupParameters(string[] args)
         {
@@ -40,6 +41,7 @@ namespace P2VEntities
             StoreImages = args.Contains("-images");
             Verbose = args.Contains("-verbose");
             JustCount = args.Contains("-count");
+            Ignore = args.GetNextStringFor("-ignore");
 
             if (Verbose) Console.WriteLine($"Startup: {JsonConvert.SerializeObject(this)}");
         }
