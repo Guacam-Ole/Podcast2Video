@@ -17,6 +17,7 @@ namespace P2VEntities
         public string Rss { get; set; }
         public string LocalMp3 { get; set; }
         public string Episode { get; set; }
+        public int? EpisodeId { get; set; }
         public TimeSpan? Chapter { get; set; }
         public TimeSpan? Start { get; set; }
         public TimeSpan? Finish { get; set; }
@@ -31,6 +32,11 @@ namespace P2VEntities
             if (args.Length ==0) throw new Exception("No RSS - feed");
             if (!args[0].StartsWith("-")) Rss = args[0];
 
+            string EpisodeIdVal = args.GetNextStringFor("-episodeid");
+            if (EpisodeIdVal != null)
+            {
+                EpisodeId=int.Parse(EpisodeIdVal);
+            }
             Episode = args.GetNextStringFor("-episode");
             Chapter = args.GetNextTimespanFor("-chapter");
             Start = args.GetNextTimespanFor("-start");

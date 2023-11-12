@@ -2,7 +2,7 @@
   "profiles": {
     "Podcast2Video": {
       "commandName": "Project",
-      "commandLineArgs": "https://www.blathering.de/feed/mp3 -count -ignore Nullnummer"
+      "commandLineArgs": "https://www.ndr.de/nachrichten/info/podcast4450.xml -episodeid 1 -start 0:00:00 -finish 0:00:37"
     }
   }
 }

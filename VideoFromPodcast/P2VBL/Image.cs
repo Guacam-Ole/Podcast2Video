@@ -18,11 +18,12 @@ namespace P2VBL
 
         private Bitmap _background = null;
 
-        public Image(Podcast podcast, string episodeId)
+        public Image(Podcast podcast, string episodeName, int? episodeId)
         {
             Podcast = podcast;
             CurrentEpisode = Podcast.Episodes.First();
-            if (episodeId != null) CurrentEpisode = Podcast.Episodes.First(q => q.Unique == episodeId);
+            if (episodeName != null) CurrentEpisode = Podcast.Episodes.First(q => q.Unique == episodeName);
+            if (episodeId!= null) CurrentEpisode = Podcast.Episodes[episodeId.Value];
             _podcastImage = DownloadImage();
         }
 

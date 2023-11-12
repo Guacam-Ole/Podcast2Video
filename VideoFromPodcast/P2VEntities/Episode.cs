@@ -10,6 +10,7 @@ namespace P2VEntities
         public string Link { get; set; }
         public string Audio { get; set; }
         public string Unique { get; set; }
+        public int Id { get; set; }
         public TimeSpan Duration { get; set; }
         public List<Chapter> Chapters { get; set; }
         public DateTime Published { get; set; }

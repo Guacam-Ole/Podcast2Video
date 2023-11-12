@@ -104,7 +104,7 @@ namespace VideoFromPodcast
                 return;
             }
 
-            var output = new Image(rss.Podcast, startupParameters.Episode);
+            var output = new Image(rss.Podcast, startupParameters.Episode, startupParameters.EpisodeId);
 
             Video video;
             if (startupParameters.Chapter != null)

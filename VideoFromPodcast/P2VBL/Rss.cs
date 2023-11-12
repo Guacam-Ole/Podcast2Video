@@ -44,12 +44,14 @@ namespace P2VBL
             var episodes = channel.SelectNodes("item");
             foreach (XmlNode xmlEpisode in episodes)
             {
+                int counter = 0;
                 var episode = new Episode
                 {
                     Title = xmlEpisode.SelectSingleNode("title").InnerText,
                     Description = xmlEpisode.SelectSingleNode("description").InnerText,
                     Link = xmlEpisode.SelectNodes("link")[0].InnerText,
-                    Unique = xmlEpisode.SelectSingleNode("itunes:episode", namespacemanager).InnerText,
+                    Id = counter++,
+                    Unique = xmlEpisode.SelectSingleNode("itunes:episode", namespacemanager)?.InnerText,
                     Duration = xmlEpisode.SelectSingleNode("itunes:duration", namespacemanager).InnerText.ToTimeSpan(),
                     Audio = xmlEpisode.SelectSingleNode("enclosure").Attributes["url"].InnerText,
                     Chapters = new List<Chapter>(),
